@@ -59,6 +59,9 @@ public class ControllerOp extends OpMode {
 	// amount to change the claw servo position by
 	double clawDelta = 0.1;
 
+    //Current speed modus, the higher the faster
+    int speedMode = 1;
+
 	DcMotor motorRight;
 	DcMotor motorLeft;
 	Servo claw;
@@ -90,38 +93,73 @@ public class ControllerOp extends OpMode {
     //Loop every couple of ms
 	@Override
 	public void loop() {
+        //Change speed modus
+        if(gamepad1.right_bumper) {
+            speedMode = speedMode +  1;
+        }else if(gamepad1.left_bumper){
+            speedMode = speedMode - 1;
+        }
+        //Range speed modus from one to three (three being max speed, one being minimum)
+        speedMode = (int) Range.clip(speedMode,1,3);
 
-		/*
-		 * Gamepad 1
-		 * 
-		 * Gamepad 1 controls the motors via the left stick, and it controls the
-		 * wrist/claw via the a,b, x, y buttons
-		 */
+        //Forwards
+		float acceleration = gamepad1.right_trigger;
+        //Backwards
+        float decelelation = gamepad1.left_trigger;
 
-		// throttle: left_stick_y ranges from -1 to 1, where -1 is full up, and
-		// 1 is full down
-		// direction: left_stick_x ranges from -1 to 1, where -1 is full left
-		// and 1 is full right
-		
-		/*
-		rechtdoor:            achteruit:            wijk rechts:        wijk links:
-		throttle = 1          throttle = -1         throttle = 0.5      throttle = 0.5
-		direction = 0         direction = 0         direction = 0.5     direction = -0.5
-		right = 1             right = -1            right = 0           right = 1
-		left = 1              left = -1             left = 1            left = 0
-		*/
-		
+        if(decelelation>0){
+            acceleration = 0-decelelation;
+        }
+
+        acceleration = calculateAcceleration(acceleration);
+
+        //Direction
+        //left_stick_x ranges from -1 to 1, where -1 is full left and 1 is full right
+        float direction = gamepad1.left_stick_x;
+        direction = Range.clip(direction,-1,1);
+
+        if(speedMode == 1){
+            direction = direction/4;
+        }else if(speedMode == 2){
+            direction = direction/2;
+        }
+        float left = 0;
+        float right = 0;
+        if(direction < 0){
+            left = acceleration+direction;
+        }else if(direction > 0){
+            right = acceleration-direction;
+        }
+
+        //After here, left and right motor power are calculated, so set values to motor
+        motorLeft.setPower(left);
+        motorRight.setPower(right);
 
 
-		/*
-		 * Send telemetry data back to driver station. Note that if we are using
-		 * a legacy NXT-compatible motor controller, then the getPower() method
-		 * will return a null value. The legacy NXT-compatible motor controllers
-		 * are currently write only.
-		 */
+
         telemetry.addData("Text", "*** Robot Data***");
 
 	}
+
+    public float calculateAcceleration(float acceleration){
+        //Slowest mode
+        if(speedMode == 1){
+            //Max motor speed = 0.25
+            acceleration = acceleration/4;
+
+        }
+        //Middle mode
+        else if(speedMode == 2){
+            //Max motor speed = 0.5
+            acceleration = acceleration/2;
+        }
+        //Fastest mode
+        else if(speedMode == 3){
+            //Max motor speed = 1
+
+        }
+        return acceleration;
+    }
 
 	//Op Mode disabled
 	@Override
@@ -137,7 +175,7 @@ public class ControllerOp extends OpMode {
 	double scaleInput(double dVal)  {
 		double[] scaleArray = { 0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
 				0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00 };
-		
+
 		// get the corresponding index for the scaleInput array.
 		int index = (int) (dVal * 16.0);
 		if (index < 0) {
@@ -145,14 +183,14 @@ public class ControllerOp extends OpMode {
 		} else if (index > 16) {
 			index = 16;
 		}
-		
+
 		double dScale = 0.0;
 		if (dVal < 0) {
 			dScale = -scaleArray[index];
 		} else {
 			dScale = scaleArray[index];
 		}
-		
+
 		return dScale;
 	}
 
