@@ -59,11 +59,10 @@ public class ControllerOp extends OpMode {
 	// amount to change the claw servo position by
 	double clawDelta = 0.1;
 
-    //Current speed modus, the higher the faster
-    int speedMode = 1;
-
-	DcMotor motorRight;
-	DcMotor motorLeft;
+	DcMotor motorRight1;
+    DcMotor motorRight2;
+	DcMotor motorLeft1;
+    DcMotor motorLeft2;
 	Servo claw;
 	Servo arm;
 
@@ -76,10 +75,13 @@ public class ControllerOp extends OpMode {
 	@Override
 	public void init() {
 		//Get all the motors
-		motorRight = hardwareMap.dcMotor.get("motor_2");
-		motorLeft = hardwareMap.dcMotor.get("motor_1");
+        motorRight1 = hardwareMap.dcMotor.get("motor_2");
+        motorRight2 = hardwareMap.dcMotor.get("motor_1");
+		motorLeft1 = hardwareMap.dcMotor.get("motor_3");
+        motorLeft1 = hardwareMap.dcMotor.get("motor_4");
 		//Reverse direction of left motor
-		motorLeft.setDirection(DcMotor.Direction.REVERSE);
+		motorLeft1.setDirection(DcMotor.Direction.REVERSE);
+        motorLeft2.setDirection(DcMotor.Direction.REVERSE);
 
 		//Get all servos
 		arm = hardwareMap.servo.get("servo_1");
@@ -93,73 +95,61 @@ public class ControllerOp extends OpMode {
     //Loop every couple of ms
 	@Override
 	public void loop() {
-        //Change speed modus
-        if(gamepad1.right_bumper) {
-            speedMode = speedMode +  1;
-        }else if(gamepad1.left_bumper){
-            speedMode = speedMode - 1;
+        //If the gamepad right stick is steering turn robot around its axis
+        if(gamepad1.right_stick_x>0||gamepad1.right_stick_x<0){
+            //Get steering direction
+            float direction = gamepad1.right_stick_x;
+            //Steer to the right direction
+            motorRight1.setPower(-direction);
+            motorRight2.setPower(-direction);
+            motorLeft1.setPower(direction);
+            motorLeft2.setPower(direction);
         }
-        //Range speed modus from one to three (three being max speed, one being minimum)
-        speedMode = (int) Range.clip(speedMode,1,3);
+        //Else calculate the left/right motor power
+        else {
+            //Forwards
+            float acceleration = gamepad1.right_trigger;
+            //Backwards
+            float decelelation = gamepad1.left_trigger;
+            //Clip acceleration and deceleration so it doesn't exceed 1 (full motor power)
+            acceleration = Range.clip(acceleration, 0, 1);
+            decelelation = Range.clip(decelelation, 0, 1);
+            //Scale input so it scales exponentially
+            acceleration = (float) scaleInput(acceleration);
+            decelelation = (float) scaleInput(decelelation);
+            //Calculate negative acceleration if deceleration is pressed
+            if (decelelation > 0) {
+                acceleration = 0 - decelelation;
+            }
 
-        //Forwards
-		float acceleration = gamepad1.right_trigger;
-        //Backwards
-        float decelelation = gamepad1.left_trigger;
+            //Direction
+            //left_stick_x ranges from -1 to 1, where -1 is full left and 1 is full right
+            float direction = gamepad1.left_stick_x;
+            direction = Range.clip(direction, -1, 1);
 
-        if(decelelation>0){
-            acceleration = 0-decelelation;
+            //Calculate speed of left and right motor
+            float left = acceleration;
+            float right = acceleration;
+            if (direction < 0) {
+                left = acceleration + direction;
+            } else if (direction > 0) {
+                right = acceleration - direction;
+            }
+
+            //After here, left and right motor power are calculated, so set values to motor
+            motorLeft1.setPower(left);
+            motorLeft2.setPower(left);
+            motorRight1.setPower(right);
+            motorRight2.setPower(right);
         }
+        
 
-        acceleration = calculateAcceleration(acceleration);
-
-        //Direction
-        //left_stick_x ranges from -1 to 1, where -1 is full left and 1 is full right
-        float direction = gamepad1.left_stick_x;
-        direction = Range.clip(direction,-1,1);
-
-        if(speedMode == 1){
-            direction = direction/4;
-        }else if(speedMode == 2){
-            direction = direction/2;
-        }
-        float left = 0;
-        float right = 0;
-        if(direction < 0){
-            left = acceleration+direction;
-        }else if(direction > 0){
-            right = acceleration-direction;
-        }
-
-        //After here, left and right motor power are calculated, so set values to motor
-        motorLeft.setPower(left);
-        motorRight.setPower(right);
 
 
 
         telemetry.addData("Text", "*** Robot Data***");
 
 	}
-
-    public float calculateAcceleration(float acceleration){
-        //Slowest mode
-        if(speedMode == 1){
-            //Max motor speed = 0.25
-            acceleration = acceleration/4;
-
-        }
-        //Middle mode
-        else if(speedMode == 2){
-            //Max motor speed = 0.5
-            acceleration = acceleration/2;
-        }
-        //Fastest mode
-        else if(speedMode == 3){
-            //Max motor speed = 1
-
-        }
-        return acceleration;
-    }
 
 	//Op Mode disabled
 	@Override
