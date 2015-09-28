@@ -59,12 +59,21 @@ public class ControllerOp extends OpMode {
 	// amount to change the claw servo position by
 	double clawDelta = 0.1;
 
+    // position of the joint servo
+    double jointPosition;
+
+    // amount to change the joint servo position by
+    double jointDelta = 0.1;
+
 	DcMotor motorRight1;
     DcMotor motorRight2;
 	DcMotor motorLeft1;
     DcMotor motorLeft2;
 	Servo claw;
 	Servo arm;
+    Servo joint;
+    DcMotor motorTurn;
+
 
 	//Constructor
 	public ControllerOp() {
@@ -79,22 +88,28 @@ public class ControllerOp extends OpMode {
         motorRight2 = hardwareMap.dcMotor.get("motor_1");
 		motorLeft1 = hardwareMap.dcMotor.get("motor_3");
         motorLeft1 = hardwareMap.dcMotor.get("motor_4");
+        motorTurn = hardwareMap.dcMotor.get("motor_5");
+
 		//Reverse direction of left motor
 		motorLeft1.setDirection(DcMotor.Direction.REVERSE);
         motorLeft2.setDirection(DcMotor.Direction.REVERSE);
 
 		//Get all servos
 		arm = hardwareMap.servo.get("servo_1");
-		claw = hardwareMap.servo.get("servo_6");
+		claw = hardwareMap.servo.get("servo_3");
+        joint = hardwareMap.servo.get("servo_2");
 
 		//Assign the starting position of the wrist and claw
 		armPosition = 0.2;
 		clawPosition = 0.2;
+        jointPosition = 0.2;
 	}
 
     //Loop every couple of ms
 	@Override
 	public void loop() {
+        //GAMEPAD1:
+
         //If the gamepad right stick is steering turn robot around its axis
         if(gamepad1.right_stick_x>0||gamepad1.right_stick_x<0){
             //Get steering direction
@@ -136,12 +151,25 @@ public class ControllerOp extends OpMode {
                 right = acceleration - direction;
             }
 
+			left = Range.clip(left,0,1);
+            right = Range.clip(right,0,1);
+
             //After here, left and right motor power are calculated, so set values to motor
             motorLeft1.setPower(left);
             motorLeft2.setPower(left);
             motorRight1.setPower(right);
             motorRight2.setPower(right);
         }
+
+        //GAMEPAD2:
+        //If the gamepad left stick is steering turn robot around
+        if(gamepad2.left_trigger>0){
+            motorTurn.setPower(gamepad2.left_trigger/2);
+        }
+        else if(gamepad2.right_trigger>0){
+            motorTurn.setPower(-gamepad2.right_trigger/2);
+        }
+
 
 
 
