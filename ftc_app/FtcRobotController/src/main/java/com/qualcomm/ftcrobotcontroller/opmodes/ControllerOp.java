@@ -45,25 +45,34 @@ public class ControllerOp extends OpMode {
 	final static double ARM_MIN_RANGE  = 0.20;
 	final static double ARM_MAX_RANGE  = 0.90;
 	final static double CLAW_MIN_RANGE  = 0.20;
-	final static double CLAW_MAX_RANGE  = 0.7;
+	final static double CLAW_MAX_RANGE  = 0.70;
+    final static double JOINT_MIN_RANGE = 0.20;
+    final static double JOINT_MAX_RANGE = 0.90;
 
 	// position of the arm servo.
 	double armPosition;
-
 	// amount to change the arm servo position.
 	double armDelta = 0.1;
 
-	// position of the claw servo
+	// position of the claw motor
 	double clawPosition;
-
-	// amount to change the claw servo position by
-	double clawDelta = 0.1;
+    // amount to change the claw servo position by
+    double clawDelta = 0.1;
 
     // position of the joint servo
     double jointPosition;
-
     // amount to change the joint servo position by
     double jointDelta = 0.1;
+
+    //Position arm, joint, claw starts and ends in
+    double armStartingPosition = 0.2;
+    double jointStartingPosition = 0.2;
+    double clawStartingPosition = 0.2;
+
+    //Hook folded
+    double hookStartingPosition = 0.2;
+    //Hook unfolded
+    double hookEndPosition = 0.6;
 
 	DcMotor motorRight1;
     DcMotor motorRight2;
@@ -72,8 +81,8 @@ public class ControllerOp extends OpMode {
 	Servo claw;
 	Servo arm;
     Servo joint;
+    Servo hook;
     DcMotor motorTurn;
-
 
 	//Constructor
 	public ControllerOp() {
@@ -96,19 +105,19 @@ public class ControllerOp extends OpMode {
 
 		//Get all servos
 		arm = hardwareMap.servo.get("servo_1");
-		claw = hardwareMap.servo.get("servo_3");
         joint = hardwareMap.servo.get("servo_2");
+        claw = hardwareMap.servo.get("servo_3");
 
 		//Assign the starting position of the wrist and claw
-		armPosition = 0.2;
-		clawPosition = 0.2;
-        jointPosition = 0.2;
+		armPosition = armStartingPosition;
+		clawPosition = clawStartingPosition;
+        jointPosition = jointStartingPosition;
 	}
 
     //Loop every couple of ms
 	@Override
 	public void loop() {
-        //GAMEPAD1:
+        //GAMEPAD1, DRIVING THE ROBOT:
 
         //If the gamepad right stick is steering turn robot around its axis
         if(gamepad1.right_stick_x>0||gamepad1.right_stick_x<0){
@@ -120,6 +129,7 @@ public class ControllerOp extends OpMode {
             motorLeft1.setPower(direction);
             motorLeft2.setPower(direction);
         }
+
         //Else calculate the left/right motor power
         else {
             //Forwards
@@ -161,7 +171,8 @@ public class ControllerOp extends OpMode {
             motorRight2.setPower(right);
         }
 
-        //GAMEPAD2:
+        //GAMEPAD2, ARM, CLAW, JOINT, ROTATE AND HOOK:
+
         //If the gamepad left stick is steering turn robot around
         if(gamepad2.left_trigger>0){
             motorTurn.setPower(gamepad2.left_trigger/2);
@@ -170,10 +181,53 @@ public class ControllerOp extends OpMode {
             motorTurn.setPower(-gamepad2.right_trigger/2);
         }
 
+        //If the left stick is pressed, arm goes up/down
+        if(gamepad2.left_stick_y>0){
+            armPosition+=armDelta;
+        }
+        else if(gamepad2.left_stick_y<0){
+            armPosition-=armDelta;
+        }
+        //Make sure arm doesn't exceed min/max position
+        armPosition = Range.clip(armPosition,ARM_MIN_RANGE,ARM_MAX_RANGE);
+        //Set calculated position of arm
+        arm.setPosition(armPosition);
+
+        //If right stick is pressed, claw opens/closes
+        if(gamepad2.right_stick_y>0) {
+            clawPosition+=clawDelta;
+        }
+        else if(gamepad2.right_stick_y<0){
+            clawPosition-=clawDelta;
+        }
+        //Make sure claw doesn't exceed min/max range
+        clawPosition = Range.clip(clawPosition,CLAW_MIN_RANGE,CLAW_MAX_RANGE);
+        //Set position of arm
+        claw.setPosition(clawPosition);
 
 
+        //If Y is pressed, arm moves up
+        if(gamepad2.y){
+            jointPosition+=jointDelta;
+        }
 
+        //If A is pressed, arm moves down
+        if(gamepad2.a){
+            jointPosition-=jointDelta;
+        }
+        // Set position of joint
+        joint.setPosition(jointPosition);
+        //Make sure joint doesn't exceed min/max range
+        jointPosition=Range.clip(jointPosition,JOINT_MIN_RANGE,JOINT_MAX_RANGE);
 
+        //If D-Pad down is pressed, hook unfolds
+        if(gamepad2.dpad_down){
+            hook.setPosition(hookEndPosition);
+        }
+        //If D-pad up is pressed, hook folds
+        if(gamepad2.dpad_up){
+            hook.setPosition(hookStartingPosition);
+        }
 
         telemetry.addData("Text", "*** Robot Data***");
 
@@ -182,6 +236,11 @@ public class ControllerOp extends OpMode {
 	//Op Mode disabled
 	@Override
 	public void stop() {
+        //Set arm to starting position when shut down
+        arm.setPosition(armStartingPosition);
+        claw.setPosition(clawStartingPosition);
+        joint.setPosition(jointStartingPosition);
+        hook.setPosition(hookStartingPosition);
 
 	}
 	
