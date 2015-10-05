@@ -230,7 +230,13 @@ public class ControllerOp extends OpMode {
         }
 
         telemetry.addData("Text", "*** Robot Data***");
-
+        telemetry.addData("arm","arm: "+String.valueOf(armPosition));
+        telemetry.addData("joint","joint: "+String.valueOf(jointPosition));
+        telemetry.addData("claw", "claw: "+String.valueOf(clawPosition));
+        telemetry.addData("hook", "hook: "+String.valueOf(hook.getPosition()));
+        telemetry.addData("motor left","left: "+String.valueOf(motorLeft1.getPower()));
+        telemetry.addData("motor right","right: "+String.valueOf(motorRight1.getPower()));
+        telemetry.addData("motor turn", "turn"+String.valueOf(motorTurn.getPower()));
 	}
 
 	//Op Mode disabled
@@ -261,7 +267,7 @@ public class ControllerOp extends OpMode {
 			index = 16;
 		}
 
-		double dScale = 0.0;
+		double dScale;
 		if (dVal < 0) {
 			dScale = -scaleArray[index];
 		} else {
