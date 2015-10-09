@@ -161,8 +161,8 @@ public class ControllerOp extends OpMode {
                 right = acceleration - direction;
             }
 
-			left = Range.clip(left, 0, 1);
-            right = Range.clip(right, 0, 1);
+			left = Range.clip(left,0,1);
+            right = Range.clip(right,0,1);
 
             //After here, left and right motor power are calculated, so set values to motor
             motorLeft1.setPower(left);
@@ -189,7 +189,7 @@ public class ControllerOp extends OpMode {
             armPosition-=armDelta;
         }
         //Make sure arm doesn't exceed min/max position
-        armPosition = Range.clip(armPosition, ARM_MIN_RANGE, ARM_MAX_RANGE);
+        armPosition = Range.clip(armPosition,ARM_MIN_RANGE,ARM_MAX_RANGE);
         //Set calculated position of arm
         arm.setPosition(armPosition);
 
@@ -201,7 +201,7 @@ public class ControllerOp extends OpMode {
             clawPosition-=clawDelta;
         }
         //Make sure claw doesn't exceed min/max range
-        clawPosition = Range.clip(clawPosition, CLAW_MIN_RANGE, CLAW_MAX_RANGE);
+        clawPosition = Range.clip(clawPosition,CLAW_MIN_RANGE,CLAW_MAX_RANGE);
         //Set position of arm
         claw.setPosition(clawPosition);
 
@@ -218,7 +218,7 @@ public class ControllerOp extends OpMode {
         // Set position of joint
         joint.setPosition(jointPosition);
         //Make sure joint doesn't exceed min/max range
-        jointPosition= Range.clip(jointPosition, JOINT_MIN_RANGE, JOINT_MAX_RANGE);
+        jointPosition=Range.clip(jointPosition,JOINT_MIN_RANGE,JOINT_MAX_RANGE);
 
         //If D-Pad down is pressed, hook unfolds
         if(gamepad2.dpad_down){

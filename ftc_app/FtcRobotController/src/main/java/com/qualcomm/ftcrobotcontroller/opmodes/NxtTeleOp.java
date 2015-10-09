@@ -68,25 +68,17 @@ public class NxtTeleOp extends OpMode {
 
   /*
    * Code to run when the op mode is first enabled goes here
-   * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#init()
+   * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#start()
    */
   @Override
   public void init() {
+
     motorRight = hardwareMap.dcMotor.get("motor_2");
     motorLeft = hardwareMap.dcMotor.get("motor_1");
     claw = hardwareMap.servo.get("servo_6"); // channel 6
     wrist = hardwareMap.servo.get("servo_1"); // channel 1
 
     wheelController = hardwareMap.dcMotorController.get("wheels");
-  }
-
-  /*
-   * Code that runs repeatedly when the op mode is first enabled goes here
-   * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#init_loop()
-   */
-  @Override
-  public void init_loop() {
-
     devMode = DcMotorController.DeviceMode.WRITE_ONLY;
 
     motorRight.setDirection(DcMotor.Direction.REVERSE);

@@ -78,7 +78,7 @@ public class LinearIrExample extends LinearOpMode {
 
     // wait for the robot to center on the beacon
     while (irSeeker.getAngle() != 0) {
-      waitOneFullHardwareCycle();
+      waitOneHardwareCycle();
     }
 
     // now approach the beacon
@@ -87,7 +87,7 @@ public class LinearIrExample extends LinearOpMode {
 
     // wait until we are close enough
     while (irSeeker.getStrength() < HOLD_IR_SIGNAL_STRENGTH) {
-      waitOneFullHardwareCycle();
+      waitOneHardwareCycle();
     }
 
     // stop the motors
