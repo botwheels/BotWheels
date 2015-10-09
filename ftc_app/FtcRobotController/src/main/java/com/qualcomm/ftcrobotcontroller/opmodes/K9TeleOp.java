@@ -79,9 +79,9 @@ public class K9TeleOp extends OpMode {
 	}
 
 	/*
-	 * Code to run when the op mode is initialized goes here
+	 * Code to run when the op mode is first enabled goes here
 	 * 
-	 * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#init()
+	 * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#start()
 	 */
 	@Override
 	public void init() {
@@ -134,15 +134,6 @@ public class K9TeleOp extends OpMode {
 		// 1 is full down
 		// direction: left_stick_x ranges from -1 to 1, where -1 is full left
 		// and 1 is full right
-		
-		/*
-		rechtdoor:            achteruit:            wijk rechts:        wijk links:
-		throttle = 1          throttle = -1         throttle = 0.5      throttle = 0.5
-		direction = 0         direction = 0         direction = 0.5     direction = -0.5
-		right = 1             right = -1            right = 0           right = 1
-		left = 1              left = -1             left = 1            left = 0
-		*/
-		
 		float throttle = -gamepad1.left_stick_y;
 		float direction = gamepad1.left_stick_x;
 		float right = throttle - direction;
@@ -216,7 +207,8 @@ public class K9TeleOp extends OpMode {
 	public void stop() {
 
 	}
-	
+
+    	
 	/*
 	 * This method scales the joystick input so for low joystick values, the 
 	 * scaled value is less than linear.  This is to make it easier to drive
@@ -228,19 +220,26 @@ public class K9TeleOp extends OpMode {
 		
 		// get the corresponding index for the scaleInput array.
 		int index = (int) (dVal * 16.0);
+		
+		// index should be positive.
 		if (index < 0) {
 			index = -index;
-		} else if (index > 16) {
+		}
+
+		// index cannot exceed size of array minus 1.
+		if (index > 16) {
 			index = 16;
 		}
-		
+
+		// get value from the array.
 		double dScale = 0.0;
 		if (dVal < 0) {
 			dScale = -scaleArray[index];
 		} else {
 			dScale = scaleArray[index];
 		}
-		
+
+		// return scaled value.
 		return dScale;
 	}
 
