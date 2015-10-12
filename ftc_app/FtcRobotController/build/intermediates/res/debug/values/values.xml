@@ -9,8 +9,12 @@
     <item>IR_SEEKER</item>
     <item>LIGHT_SENSOR</item>
     <item>ACCELEROMETER</item>
+    <item>ULTRASONIC_SENSOR</item>
     <item>MOTOR_CONTROLLER</item>
     <item>SERVO_CONTROLLER</item>
+    <item>MATRIX_CONTROLLER</item>
+    <item>TOUCH_SENSOR_MULTIPLEXER</item>
+    <item>COLOR_SENSOR</item>
     <item>NOTHING</item>
   </string-array>
     <string-array name="choice_array_analogInput">
@@ -25,11 +29,14 @@
     <string-array name="choice_array_digital_device">
     <item>NOTHING</item>
     <item>TOUCH_SENSOR</item>
+    <item>LED</item>
     <item>DIGITAL_DEVICE</item>
   </string-array>
     <string-array name="choice_array_i2c">
     <item>NOTHING</item>
     <item>IR_SEEKER_V3</item>
+    <item>ADAFRUIT_COLOR_SENSOR</item>
+    <item>COLOR_SENSOR</item>
     <item>I2C_DEVICE</item>
   </string-array>
     <string-array name="device_interface_module_options_array">
@@ -137,6 +144,7 @@
     <string name="edit_digital_devices_activity">Edit Digital Devices</string>
     <string name="edit_i2c_devices_activity">Edit I2c Devices</string>
     <string name="edit_legacy_module_controller_activity">Edit Legacy Module Controller</string>
+    <string name="edit_matrix_controller_activity">Edit Matrix Controller</string>
     <string name="edit_motor_controller_activity">Edit Motor Controller</string>
     <string name="edit_motor_controller_menu_item">Edit Motor Controller</string>
     <string name="edit_pwm_devices_activity">Edit PWM Devices</string>
@@ -153,6 +161,19 @@
     <string name="launch_wifi_settings">Launch WiFi Settings</string>
     <string name="legacy_controller_name">Enter the name for this legacy module here</string>
     <string name="load_menu_item">Load Configuration File</string>
+    <string name="matrix_controller_name">Matrix Controller</string>
+    <string name="matrix_controller_name_prompt">Enter the name for this matrix controller here</string>
+    <string name="matrix_motor_title">Motors</string>
+    <string name="matrix_name_prompt">Matrix name</string>
+    <string name="matrix_port0">1</string>
+    <string name="matrix_port1">2</string>
+    <string name="matrix_port2">3</string>
+    <string name="matrix_port3">4</string>
+    <string name="matrix_port4">1</string>
+    <string name="matrix_port5">2</string>
+    <string name="matrix_port6">3</string>
+    <string name="matrix_port7">4</string>
+    <string name="matrix_servo_title">Servos</string>
     <string name="motor_controller_name">Motor Controller</string>
     <string name="motor_controller_name_text">Enter the name for this motor controller here</string>
     <string name="motor_name">Enter motor name</string>
@@ -216,6 +237,7 @@
     <!-- From: file:/C:/Users/Gebruiker/Desktop/BotWheels/ftc_app/FtcRobotController/src/main/res/values/strings.xml -->
     <eat-comment/>
     <string name="title_activity_view_logs">View Logs</string>
+    <string name="title_activity_wifi_channel_selector">Wifi Channel Selection</string>
     <!-- From: file:/C:/Users/Gebruiker/Desktop/BotWheels/ftc_app/FtcRobotController/build/intermediates/exploded-aar/FtcCommon-release/res/values/values.xml -->
     <eat-comment/>
     <string name="view_logs_activity">View Logs</string>

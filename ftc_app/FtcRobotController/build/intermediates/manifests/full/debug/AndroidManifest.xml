@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.qualcomm.ftcrobotcontroller"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionCode="4"
+    android:versionName="1.2" >
 
     <uses-sdk
         android:minSdkVersion="16"
@@ -75,10 +75,21 @@
 
         <activity
             android:name="com.qualcomm.ftccommon.configuration.FtcLoadFileActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="true"
             android:label="@string/configure_activity" >
             <intent-filter>
                 <action android:name="com.qualcomm.ftccommon.configuration.FtcLoadFileActivity.intent.action.Launch" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.qualcomm.ftccommon.FtcWifiChannelSelectorActivity"
+            android:exported="true"
+            android:label="@string/title_activity_wifi_channel_selector" >
+            <intent-filter>
+                <action android:name="com.qualcomm.ftccommon.FtcWifiChannelSelectorActivity.intent.action.Launch" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -104,6 +115,7 @@
         </activity>
         <activity
             android:name="com.qualcomm.ftccommon.configuration.AutoConfigureActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="true"
             android:label="@string/title_activity_autoconfigure" >
             <intent-filter>
@@ -114,6 +126,7 @@
         </activity>
         <activity
             android:name="com.qualcomm.ftccommon.configuration.FtcConfigurationActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/app_name" >
         </activity>
         <activity
@@ -141,6 +154,12 @@
             android:name="com.qualcomm.ftccommon.configuration.EditLegacyModuleControllerActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/edit_legacy_module_controller_activity"
+            android:windowSoftInputMode="stateHidden|adjustResize" >
+        </activity>
+        <activity
+            android:name="com.qualcomm.ftccommon.configuration.EditMatrixControllerActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/edit_matrix_controller_activity"
             android:windowSoftInputMode="stateHidden|adjustResize" >
         </activity>
         <activity
