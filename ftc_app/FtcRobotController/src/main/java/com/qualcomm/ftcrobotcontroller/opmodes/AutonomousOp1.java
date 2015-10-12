@@ -131,7 +131,24 @@ public class AutonomousOp1 extends OpMode {
     //Loop every couple of ms
 	@Override
 	public void loop() {
+        Calendar calendar = Calendar.getInstance();
+        int seconds = calendar.get(Calendar.SECOND);
+        if(seconds-startingSeconds>0){
+            seconds = seconds-startingSeconds;
+        }else if(seconds-startingSeconds<0){
+            seconds = seconds+60;
+            seconds = seconds-startingSeconds;
+        }
+
         if (currentMode==1){
+            if (seconds<2){
+                motorLeft1.setPower(1);
+                motorLeft2.setPower(1);
+                motorRight1.setPower(1);
+                motorRight2.setPower(1);
+            }else if(seconds>2){
+                currentMode=2;
+            }
 
         }else if(currentMode==2){
 
