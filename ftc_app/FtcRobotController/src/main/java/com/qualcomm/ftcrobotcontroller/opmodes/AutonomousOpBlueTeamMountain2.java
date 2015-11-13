@@ -145,6 +145,7 @@ public class AutonomousOpBlueTeamMountain2 extends OpMode {
     //Loop every couple of ms
 	@Override
 	public void loop() {
+        //Drive forward out of parking spot on full speed for 2 seconds
         if (currentMode==1){
             if (compareTime(startingSeconds)<2){
                 motorLeft1.setPower(1);
@@ -152,43 +153,58 @@ public class AutonomousOpBlueTeamMountain2 extends OpMode {
                 motorRight1.setPower(1);
                 motorRight2.setPower(1);
             }else{
+                //Go to the next mode after 2 seconds
                 currentMode=2;
                 modeStartingTime = getTimeSeconds();
             }
-        }else if(currentMode==2){
-            if (compareTime(modeStartingTime)<2.3){
+        }
+        //Turn left 90 degrees
+        else if(currentMode==2){
+            if (compareTime(modeStartingTime)<1){
                 motorLeft1.setPower(-1);
                 motorLeft2.setPower(-1);
                 motorRight1.setPower(1);
                 motorRight2.setPower(1);
             }else{
+                //After 1 second drive forward again
                 currentMode=3;
                 modeStartingTime = getTimeSeconds();
             }
-        }else if(currentMode==3){
+        }
+        //Go forward
+        else if(currentMode==3){
+            //Go forward on full speed as long as there's nothing in front of the robot
             if (ultrasonicSensor1.getUltrasonicLevel()>1) {
                 motorLeft1.setPower(1);
                 motorLeft2.setPower(1);
                 motorRight1.setPower(1);
                 motorRight2.setPower(1);
+                //Count how many times it has looped through this code to get a rough idea of how close the robot is to the wall
                 driven++;
             }else{
+                //Stop driving forward if there's something in front of the robot
                 motorLeft1.setPower(0);
                 motorLeft2.setPower(0);
                 motorRight1.setPower(0);
                 motorRight2.setPower(0);
+                //If the driven variable is larger as 100 assume that the robot is now at the wall and go to the next mode
+                //Otherwise assume that there's something else in front of the robot (another robot) and don't go to the next mode
+                if(driven>100){
+                    currentMode=4;
+                    modeStartingTime = getTimeSeconds();
+                }
             }
-            if(driven>100){
-                currentMode=4;
-            }
-        }else if (currentMode==4){
-            if (compareTime(modeStartingTime)<2.3){
+        }
+        //Turn right 90 degrees when in front of the edge of the field
+        else if (currentMode==4){
+            if (compareTime(modeStartingTime)<1){
                 motorLeft1.setPower(1);
                 motorLeft2.setPower(1);
                 motorRight1.setPower(-1);
                 motorRight2.setPower(-1);
                 motorTurn.setPower(-1);
             }else {
+                //After turning for 1 second go to the next mode
                 currentMode = 5;
                 modeStartingTime = getTimeSeconds();
             }
@@ -206,6 +222,7 @@ public class AutonomousOpBlueTeamMountain2 extends OpMode {
             }else{
                 //If this is the case go to the next mode
                 currentMode = 6;
+                //Save the first color for later in the program to define if the robot has to move forward or backwards to press the button
                 if(colorSensor1.blue()>1){
                     firstColor = "red";
                 }else{
@@ -229,8 +246,8 @@ public class AutonomousOpBlueTeamMountain2 extends OpMode {
         //Drive the robot next to the button
         else if (currentMode==7){
             if(compareTime(modeStartingTime)<1){
-                //Drive for/backwards a little bit to stand next to the button
-                if(firstColor == "red") {
+                //Drive for/backwards a little bit to stand next to the button of the blue side of the beacon
+                if(firstColor.equals("red")) {
                     motorRight1.setPower(0.5);
                     motorRight2.setPower(0.5);
                     motorLeft1.setPower(0.5);
@@ -255,9 +272,10 @@ public class AutonomousOpBlueTeamMountain2 extends OpMode {
             //Then go to the next mode
             currentMode = 9;
             modeStartingTime = getTimeSeconds();
-        }else if(currentMode==9) {
-            //Robot turns to the left
-            if (compareTime(modeStartingTime) < 1) {
+        }
+        else if(currentMode==9) {
+            //Robot turns 135 degrees to the left
+            if (compareTime(modeStartingTime) < 3) {
                 motorLeft1.setPower(-1);
                 motorLeft2.setPower(-1);
                 motorRight1.setPower(1);
@@ -272,7 +290,7 @@ public class AutonomousOpBlueTeamMountain2 extends OpMode {
                 currentMode = 9;
                 modeStartingTime = getTimeSeconds();
             }
-            //Turns to the right
+            //Turns 90 degrees to the right
             else if (compareTime(modeStartingTime) < 3) {
                 motorLeft1.setPower(-1);
                 motorLeft2.setPower(-1);
