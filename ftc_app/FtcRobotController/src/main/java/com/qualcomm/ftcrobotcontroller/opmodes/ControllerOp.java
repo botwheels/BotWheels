@@ -31,9 +31,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
+import com.qualcomm.ftccommon.DbgLog;
+import com.qualcomm.hardware.MatrixDcMotorController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.util.Range;
 
 /**
@@ -52,22 +56,22 @@ public class ControllerOp extends OpMode {
 	// position of the arm servo.
 	double armPosition;
 	// amount to change the arm servo position.
-	double armDelta = 0.1;
+	double armDelta = 0.005;
 
 	// position of the claw motor
 	double clawPosition;
     // amount to change the claw servo position by
-    double clawDelta = 0.1;
+    double clawDelta = 0.005;
 
     // position of the joint servo
     double jointPosition;
     // amount to change the joint servo position by
-    double jointDelta = 0.1;
+    double jointDelta = 0.005;
 
     //Position arm, joint, claw starts and ends in
-    double armStartingPosition = 0.2;
-    double jointStartingPosition = 0.2;
-    double clawStartingPosition = 0.2;
+    double armStartingPosition = 0.5;
+    double jointStartingPosition = 0.5;
+    double clawStartingPosition = 0.5;
 
     //Hook folded
     double hookStartingPosition = 0.2;
@@ -83,6 +87,8 @@ public class ControllerOp extends OpMode {
     Servo joint;
     Servo hook;
     DcMotor motorTurn;
+    MatrixDcMotorController mc;
+    ServoController sc;
 
 	//Constructor
 	public ControllerOp() {
@@ -93,11 +99,11 @@ public class ControllerOp extends OpMode {
 	@Override
 	public void init() {
 		//Get all the motors
-        motorRight1 = hardwareMap.dcMotor.get("motor_2");
-        motorRight2 = hardwareMap.dcMotor.get("motor_1");
+        motorRight1 = hardwareMap.dcMotor.get("motor_1");
+        motorRight2 = hardwareMap.dcMotor.get("motor_2");
 		motorLeft1 = hardwareMap.dcMotor.get("motor_3");
-        motorLeft1 = hardwareMap.dcMotor.get("motor_4");
-        motorTurn = hardwareMap.dcMotor.get("motor_5");
+        motorLeft2 = hardwareMap.dcMotor.get("motor_4");
+        //motorTurn = hardwareMap.dcMotor.get("motor_5");
 
 		//Reverse direction of left motor
 		motorLeft1.setDirection(DcMotor.Direction.REVERSE);
@@ -107,18 +113,28 @@ public class ControllerOp extends OpMode {
 		arm = hardwareMap.servo.get("servo_1");
         joint = hardwareMap.servo.get("servo_2");
         claw = hardwareMap.servo.get("servo_3");
+        hook = hardwareMap.servo.get("servo_4");
 
 		//Assign the starting position of the wrist and claw
 		armPosition = armStartingPosition;
 		clawPosition = clawStartingPosition;
         jointPosition = jointStartingPosition;
+
+        mc = (MatrixDcMotorController)hardwareMap.dcMotorController.get("MatrixController");
+        motorLeft1.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        motorLeft2.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        motorRight1.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        motorRight2.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+
+        sc = hardwareMap.servoController.get("MatrixController");
+        sc.pwmEnable();
 	}
 
     //Loop every couple of ms
 	@Override
 	public void loop() {
-        //GAMEPAD1, DRIVING THE ROBOT:
 
+        //GAMEPAD1, DRIVING THE ROBOT:
         //If the gamepad right stick is steering turn robot around its axis
         if(gamepad1.right_stick_x>0||gamepad1.right_stick_x<0){
             //Get steering direction
@@ -142,9 +158,11 @@ public class ControllerOp extends OpMode {
             //Scale input so it scales exponentially
             acceleration = (float) scaleInput(acceleration);
             decelelation = (float) scaleInput(decelelation);
+            DbgLog.msg("deceleration: "+decelelation);
             //Calculate negative acceleration if deceleration is pressed
             if (decelelation > 0) {
                 acceleration = 0 - decelelation;
+                DbgLog.msg("acceleration is now "+acceleration);
             }
 
             //Direction
@@ -157,12 +175,14 @@ public class ControllerOp extends OpMode {
             float right = acceleration;
             if (direction < 0) {
                 left = acceleration + direction;
+                DbgLog.msg("left is "+acceleration+"+"+direction+"="+(acceleration + direction));
             } else if (direction > 0) {
                 right = acceleration - direction;
+                DbgLog.msg("right is "+acceleration+"-"+direction+"="+(acceleration - direction));
             }
 
-			left = Range.clip(left,0,1);
-            right = Range.clip(right,0,1);
+			left = Range.clip(left,-1,1);
+            right = Range.clip(right,-1,1);
 
             //After here, left and right motor power are calculated, so set values to motor
             motorLeft1.setPower(left);
@@ -175,10 +195,10 @@ public class ControllerOp extends OpMode {
 
         //If the gamepad left stick is steering turn robot around
         if(gamepad2.left_trigger>0){
-            motorTurn.setPower(gamepad2.left_trigger/2);
+            //motorTurn.setPower(gamepad2.left_trigger/2);
         }
         else if(gamepad2.right_trigger>0){
-            motorTurn.setPower(-gamepad2.right_trigger/2);
+            //motorTurn.setPower(-gamepad2.right_trigger/2);
         }
 
         //If the left stick is pressed, arm goes up/down
@@ -229,14 +249,15 @@ public class ControllerOp extends OpMode {
             hook.setPosition(hookStartingPosition);
         }
 
-        telemetry.addData("Text", "*** Robot Data***");
-        telemetry.addData("arm","arm: "+String.valueOf(armPosition));
-        telemetry.addData("joint","joint: "+String.valueOf(jointPosition));
-        telemetry.addData("claw", "claw: "+String.valueOf(clawPosition));
-        telemetry.addData("hook", "hook: "+String.valueOf(hook.getPosition()));
-        telemetry.addData("motor left","left: "+String.valueOf(motorLeft1.getPower()));
-        telemetry.addData("motor right","right: "+String.valueOf(motorRight1.getPower()));
-        telemetry.addData("motor turn", "turn"+String.valueOf(motorTurn.getPower()));
+        //telemetry.addData("Text", "*** Robot Data***");
+        //telemetry.addData("arm","arm: "+String.valueOf(armPosition));
+        //telemetry.addData("joint","joint: "+String.valueOf(jointPosition));
+        //telemetry.addData("claw", "claw: "+String.valueOf(clawPosition));
+        //telemetry.addData("hook", "hook: "+String.valueOf());
+        //telemetry.addData("motor left","left: "+String.valueOf(motorLeft1.getPower()));
+        //telemetry.addData("motor right","right: "+String.valueOf(motorRight1.getPower()));
+        //telemetry.addData("motor turn", "turn"+String.valueOf(motorTurn.getPower()));
+
 	}
 
 	//Op Mode disabled

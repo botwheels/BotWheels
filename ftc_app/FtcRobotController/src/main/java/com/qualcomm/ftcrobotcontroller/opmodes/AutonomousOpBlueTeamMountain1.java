@@ -96,6 +96,7 @@ public class AutonomousOpBlueTeamMountain1 extends OpMode {
     int previousBlueColor;
     int previousRedColor;
     String firstColor;
+    double ultrasoniclevel;
 
 	//Constructor
 	public AutonomousOpBlueTeamMountain1() {
@@ -171,7 +172,7 @@ public class AutonomousOpBlueTeamMountain1 extends OpMode {
         //Go forward
         else if(currentMode==3){
             //Go forward on full speed as long as there's nothing in front of the robot
-            if (ultrasonicSensor1.getUltrasonicLevel()>1) {
+            if (getUltrasonic()>20) {
                 motorLeft1.setPower(1);
                 motorLeft2.setPower(1);
                 motorRight1.setPower(1);
@@ -318,6 +319,17 @@ public class AutonomousOpBlueTeamMountain1 extends OpMode {
         telemetry.addData("motor right","right: "+String.valueOf(motorRight1.getPower()));
         telemetry.addData("motor turn", "turn"+String.valueOf(motorTurn.getPower()));
 	}
+
+    private double getUltrasonic(){
+        double currentUltrasonicLevel = ultrasonicSensor1.getUltrasonicLevel();
+        if(currentUltrasonicLevel == 0 && ultrasoniclevel != 0){
+            double temp = currentUltrasonicLevel;
+            currentUltrasonicLevel = ultrasoniclevel;
+            ultrasoniclevel = temp;
+        }
+        ultrasoniclevel = currentUltrasonicLevel;
+        return currentUltrasonicLevel;
+    }
 
 	//Op Mode disabled
 	@Override

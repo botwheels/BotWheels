@@ -129,14 +129,25 @@ public class HTRGBExample extends LinearOpMode {
         sensorRGB.enableLed(false);
       }
 
+      int red = sensorRGB.red();
+        int green = sensorRGB.green();
+        int blue = sensorRGB.blue();
+        int alpha = sensorRGB.alpha();
+
+        if(red == 255 )red = 0;
+        if(green == 255) green = 0;
+        if(blue == 255) blue = 0;
+        if(alpha == 255) alpha = 0;
+
+
       // convert the RGB values to HSV values.
-      Color.RGBToHSV(sensorRGB.red(), sensorRGB.green(), sensorRGB.blue(), hsvValues);
+      Color.RGBToHSV(red, green, blue, hsvValues);
 
       // send the info back to driver station using telemetry function.
-      telemetry.addData("Clear", sensorRGB.alpha());
-      telemetry.addData("Red  ", sensorRGB.red());
-      telemetry.addData("Green", sensorRGB.green());
-      telemetry.addData("Blue ", sensorRGB.blue());
+      telemetry.addData("Clear", alpha);
+      telemetry.addData("Red  ", red);
+      telemetry.addData("Green", green);
+      telemetry.addData("Blue ", blue);
       telemetry.addData("Hue", hsvValues[0]);
 
       // change the background color to match the color detected by the RGB sensor.

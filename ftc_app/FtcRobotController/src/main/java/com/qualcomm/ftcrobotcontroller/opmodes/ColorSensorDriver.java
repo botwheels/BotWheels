@@ -35,6 +35,7 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.view.View;
 
+import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.ftcrobotcontroller.R;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -49,27 +50,27 @@ public class ColorSensorDriver extends LinearOpMode {
   public ColorSensorDevice device = ColorSensorDevice.MODERN_ROBOTICS_I2C;
 
   ColorSensor colorSensor;
-  DeviceInterfaceModule cdim;
-  LED led;
   TouchSensor t;
 
   @Override
   public void runOpMode() throws InterruptedException {
     hardwareMap.logDevices();
 
-    cdim = hardwareMap.deviceInterfaceModule.get("dim");
     switch (device) {
       case HITECHNIC_NXT:
+        DbgLog.msg("nxt");
         colorSensor = hardwareMap.colorSensor.get("nxt");
         break;
       case ADAFRUIT:
+        DbgLog.msg("adafruit");
         colorSensor = hardwareMap.colorSensor.get("lady");
         break;
       case MODERN_ROBOTICS_I2C:
+        DbgLog.msg("i2c");
         colorSensor = hardwareMap.colorSensor.get("mr");
         break;
     }
-    led = hardwareMap.led.get("led");
+    //led = hardwareMap.led.get("led");
     t = hardwareMap.touchSensor.get("t");
 
     waitForStart();
@@ -92,11 +93,11 @@ public class ColorSensorDriver extends LinearOpMode {
           Color.RGBToHSV(colorSensor.red()*8, colorSensor.green()*8, colorSensor.blue()*8, hsvValues);
           break;
       }
-      telemetry.addData("Clear", colorSensor.alpha());
-      telemetry.addData("Red  ", colorSensor.red());
-      telemetry.addData("Green", colorSensor.green());
-      telemetry.addData("Blue ", colorSensor.blue());
-      telemetry.addData("Hue", hsvValues[0]);
+      DbgLog.msg("Clear"+ colorSensor.alpha());
+      DbgLog.msg("Red  "+ colorSensor.red());
+      DbgLog.msg("Green"+ colorSensor.green());
+      DbgLog.msg("Blue "+ colorSensor.blue());
+      DbgLog.msg("Hue"+ hsvValues[0]);
 
       relativeLayout.post(new Runnable() {
         public void run() {
@@ -113,7 +114,7 @@ public class ColorSensorDriver extends LinearOpMode {
         colorSensor.enableLed(value);
         break;
       case ADAFRUIT:
-        led.enable(value);
+        //led.enable(value);
         break;
       case MODERN_ROBOTICS_I2C:
         colorSensor.enableLed(value);

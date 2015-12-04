@@ -31,9 +31,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
+import com.qualcomm.ftccommon.DbgLog;
+import com.qualcomm.hardware.MatrixDcMotorController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.LightSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoController;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 
 import java.util.Calendar;
 
@@ -41,90 +49,33 @@ import java.util.Calendar;
  * ControllerOp Mode for Driver Controlled Period
  */
 public class AutonomousOpTest extends OpMode {
-
-	// TETRIX VALUES.
-	final static double ARM_MIN_RANGE  = 0.20;
-	final static double ARM_MAX_RANGE  = 0.90;
-	final static double CLAW_MIN_RANGE  = 0.20;
-	final static double CLAW_MAX_RANGE  = 0.70;
-    final static double JOINT_MIN_RANGE = 0.20;
-    final static double JOINT_MAX_RANGE = 0.90;
-
-	// position of the arm servo.
-	double armPosition;
-	// amount to change the arm servo position.
-	double armDelta = 0.1;
-
-	// position of the claw motor
-	double clawPosition;
-    // amount to change the claw servo position by
-    double clawDelta = 0.1;
-
-    // position of the joint servo
-    double jointPosition;
-    // amount to change the joint servo position by
-    double jointDelta = 0.1;
-
-    //Position arm, joint, claw starts and ends in
-    double armStartingPosition = 0.2;
-    double jointStartingPosition = 0.2;
-    double clawStartingPosition = 0.2;
-
-    //Hook folded
-    double hookStartingPosition = 0.2;
-    //Hook unfolded
-    double hookEndPosition = 0.6;
-
-	DcMotor motorRight1;
-    DcMotor motorRight2;
-	DcMotor motorLeft1;
-    DcMotor motorLeft2;
-	Servo claw;
-	Servo arm;
-    Servo joint;
-    Servo hook;
-    DcMotor motorTurn;
-
-    Servo testServo;
-    DcMotor testMotor;
-
-    int currentMode;
-    int startingHour;
-    int startingMinute;
-    int startingSeconds;
+    UltrasonicSensor us;
+    double ultrasoniclevel;
 
 	//Constructor
 	public AutonomousOpTest() {
-
 	}
 
 	//This code runs first when Op Mode is enabled
 	@Override
 	public void init() {
-		//Get all the motors
-        testMotor = hardwareMap.dcMotor.get("motor_1");
-		testServo = hardwareMap.servo.get("servo_1");
-
-		//Assign the starting position of the wrist and claw
-		armPosition = armStartingPosition;
-		clawPosition = clawStartingPosition;
-        jointPosition = jointStartingPosition;
-
-        currentMode = 1;
-
-        Calendar calendar = Calendar.getInstance();
-        startingHour = calendar.get(Calendar.HOUR_OF_DAY);
-        startingMinute = calendar.get(Calendar.MINUTE);
-        startingSeconds = calendar.get(Calendar.SECOND);
-
+        us = hardwareMap.ultrasonicSensor.get("us");
     }
 
     //Loop every couple of ms
 	@Override
 	public void loop() {
-		testMotor.setPower(1.0);
-		testServo.setPosition(0.75);
 
+        double currentUltrasonicLevel = us.getUltrasonicLevel();
+        if(currentUltrasonicLevel == 0 && ultrasoniclevel != 0){
+			double temp = currentUltrasonicLevel;
+            currentUltrasonicLevel = ultrasoniclevel;
+			ultrasoniclevel = temp;
+        }
+        ultrasoniclevel = currentUltrasonicLevel;
+
+        telemetry.addData("ultrasonic",String.valueOf(currentUltrasonicLevel));
+        		//testServo.setPosition(1.0);
         //telemetry.addData("Text", "*** Robot Data***");
         //telemetry.addData("arm","arm: "+String.valueOf(armPosition));
         //telemetry.addData("joint","joint: "+String.valueOf(jointPosition));
@@ -139,6 +90,7 @@ public class AutonomousOpTest extends OpMode {
 	@Override
 	public void stop() {
         //Set arm to starting position when shut down
+        //testServo.setPosition(0.5);
 	}
 	
 	/*
