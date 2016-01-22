@@ -67,6 +67,11 @@ public class FtcOpModeRegister implements OpModeRegister {
     manager.register("ControllerOp",ControllerOp.class);
     manager.register("HTRGBExample", HTRGBExample.class);
 
+    manager.register("HandOpen",HandOpen.class);
+    manager.register("HandDicht",HandDicht.class);
+    manager.register("RijdenVooruit",RijdenVooruit.class);
+    manager.register("RijdenAchteruit",RijdenAchteruit.class);
+
     /*
      * Uncomment any of the following lines if you want to register an op mode.
      */

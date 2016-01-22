@@ -46,12 +46,12 @@ import com.qualcomm.robotcore.util.Range;
 public class ControllerOp extends OpMode {
 
 	// TETRIX VALUES.
-	final static double ARM_MIN_RANGE  = 0.20;
-	final static double ARM_MAX_RANGE  = 0.90;
-	final static double CLAW_MIN_RANGE  = 0.20;
-	final static double CLAW_MAX_RANGE  = 0.70;
-    final static double JOINT_MIN_RANGE = 0.20;
-    final static double JOINT_MAX_RANGE = 0.90;
+	final static double ARM_MIN_RANGE  = 0.0;
+	final static double ARM_MAX_RANGE  = 1.0;
+	final static double CLAW_MIN_RANGE  = 0.80;
+	final static double CLAW_MAX_RANGE  = 1.00;
+    final static double JOINT_MIN_RANGE = 0.40;
+    final static double JOINT_MAX_RANGE = 0.75;
 
 	// position of the arm servo.
 	double armPosition;
@@ -71,7 +71,7 @@ public class ControllerOp extends OpMode {
     //Position arm, joint, claw starts and ends in
     double armStartingPosition = 0.5;
     double jointStartingPosition = 0.5;
-    double clawStartingPosition = 0.5;
+    double clawStartingPosition = 1.0;
 
     //Hook folded
     double hookStartingPosition = 0.2;
@@ -120,6 +120,10 @@ public class ControllerOp extends OpMode {
 		clawPosition = clawStartingPosition;
         jointPosition = jointStartingPosition;
 
+        arm.setPosition(armPosition);
+        claw.setPosition(clawPosition);
+        joint.setPosition(jointPosition);
+
         mc = (MatrixDcMotorController)hardwareMap.dcMotorController.get("MatrixController");
         motorLeft1.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         motorLeft2.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
@@ -133,21 +137,26 @@ public class ControllerOp extends OpMode {
     //Loop every couple of ms
 	@Override
 	public void loop() {
-
+        float left = 0;
+        float right = 0;
         //GAMEPAD1, DRIVING THE ROBOT:
-        //If the gamepad right stick is steering turn robot around its axis
+        //If the gamepad right stick is steering turn robot around its axis - Commented out, doesn't work with the current tires
+        /*
         if(gamepad1.right_stick_x>0||gamepad1.right_stick_x<0){
             //Get steering direction
             float direction = gamepad1.right_stick_x;
+            left = direction;
+            right = -direction;
             //Steer to the right direction
-            motorRight1.setPower(-direction);
-            motorRight2.setPower(-direction);
-            motorLeft1.setPower(direction);
-            motorLeft2.setPower(direction);
+            motorRight1.setPower(right);
+            motorRight2.setPower(right);
+            motorLeft1.setPower(left);
+            motorLeft2.setPower(left);
         }
+        */
 
         //Else calculate the left/right motor power
-        else {
+        //else {
             //Forwards
             float acceleration = gamepad1.right_trigger;
             //Backwards
@@ -171,13 +180,15 @@ public class ControllerOp extends OpMode {
             direction = Range.clip(direction, -1, 1);
 
             //Calculate speed of left and right motor
-            float left = acceleration;
-            float right = acceleration;
+            left = acceleration;
+            right = acceleration;
             if (direction < 0) {
-                left = acceleration + direction;
+                if(acceleration > 0) left = acceleration + direction;
+                if(acceleration < 0) left = acceleration - direction;
                 DbgLog.msg("left is "+acceleration+"+"+direction+"="+(acceleration + direction));
             } else if (direction > 0) {
-                right = acceleration - direction;
+                if(acceleration > 0) right = acceleration - direction;
+                if(acceleration < 0) right = acceleration + direction;
                 DbgLog.msg("right is "+acceleration+"-"+direction+"="+(acceleration - direction));
             }
 
@@ -189,7 +200,7 @@ public class ControllerOp extends OpMode {
             motorLeft2.setPower(left);
             motorRight1.setPower(right);
             motorRight2.setPower(right);
-        }
+        //}
 
         //GAMEPAD2, ARM, CLAW, JOINT, ROTATE AND HOOK:
 
@@ -250,12 +261,12 @@ public class ControllerOp extends OpMode {
         }
 
         //telemetry.addData("Text", "*** Robot Data***");
-        //telemetry.addData("arm","arm: "+String.valueOf(armPosition));
+        telemetry.addData("arm","arm: "+String.valueOf(armPosition));
         //telemetry.addData("joint","joint: "+String.valueOf(jointPosition));
         //telemetry.addData("claw", "claw: "+String.valueOf(clawPosition));
         //telemetry.addData("hook", "hook: "+String.valueOf());
-        //telemetry.addData("motor left","left: "+String.valueOf(motorLeft1.getPower()));
-        //telemetry.addData("motor right","right: "+String.valueOf(motorRight1.getPower()));
+        telemetry.addData("motor left","left: "+left);
+        telemetry.addData("motor right","right: "+right);
         //telemetry.addData("motor turn", "turn"+String.valueOf(motorTurn.getPower()));
 
 	}

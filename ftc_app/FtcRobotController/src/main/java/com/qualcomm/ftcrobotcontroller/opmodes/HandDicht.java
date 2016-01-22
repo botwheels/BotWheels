@@ -31,83 +31,44 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
-import com.qualcomm.ftccommon.DbgLog;
-import com.qualcomm.hardware.MatrixDcMotorController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
-import com.qualcomm.robotcore.hardware.LightSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
-import com.qualcomm.robotcore.hardware.TouchSensor;
-import com.qualcomm.robotcore.hardware.UltrasonicSensor;
-
-import java.util.Calendar;
 
 /**
  * ControllerOp Mode for Driver Controlled Period
  */
-public class AutonomousOpTest extends OpMode {
-    Servo servoTest;
-    ServoController sc;
-    double servoPos = 0.9; //Min .4
-    DcMotor dm1;
-	DcMotor dm2;
-	DcMotor dm3;
-	DcMotor dm4;
+public class HandDicht extends OpMode {
+	Servo servoTest;
+	ServoController sc;
+	double servoPos = 1; //Min .4
 
 	//Constructor
-	public AutonomousOpTest() {
+	public HandDicht() {
 	}
 
 	//This code runs first when Op Mode is enabled
 	@Override
 	public void init() {
 		servoTest = hardwareMap.servo.get("servo1");
-        sc = hardwareMap.servoController.get("matrix");
-        dm1 = hardwareMap.dcMotor.get("motor1");
-		dm2 = hardwareMap.dcMotor.get("motor2");
-		dm3 = hardwareMap.dcMotor.get("motor3");
-		dm4 = hardwareMap.dcMotor.get("motor4");
-		dm1.setDirection(DcMotor.Direction.REVERSE);
-		dm2.setDirection(DcMotor.Direction.REVERSE);
+		sc = hardwareMap.servoController.get("matrix");
+		sc.pwmEnable();
+		servoTest.setPosition(servoPos);
+	}
 
-        dm1.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-		dm2.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-		dm3.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-		dm4.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-        sc.pwmEnable();
-        servoTest.setPosition(servoPos);
-    }
-
-    //Loop every couple of ms
+	//Loop every couple of ms
 	@Override
 	public void loop() {
-        servoTest.setPosition(servoPos);
-        dm1.setPower(1);
-		dm2.setPower(1);
-		dm3.setPower(1);
-		dm4.setPower(1);
-        //telemetry.addData("servopos", String.valueOf(servoTest.getPosition()));
-
-        //telemetry.addData("ultrasonic",String.valueOf(currentUltrasonicLevel));
-        		//testServo.setPosition(1.0);
-        //telemetry.addData("Text", "*** Robot Data***");
-        //telemetry.addData("arm","arm: "+String.valueOf(armPosition));
-        //telemetry.addData("joint","joint: "+String.valueOf(jointPosition));
-        //telemetry.addData("claw", "claw: "+String.valueOf(clawPosition));
-        //telemetry.addData("hook", "hook: "+String.valueOf(hook.getPosition()));
-        //telemetry.addData("motor left","left: "+String.valueOf(motorLeft1.getPower()));
-        //telemetry.addData("motor right","right: "+String.valueOf(motorRight1.getPower()));
-        //telemetry.addData("motor turn", "turn"+String.valueOf(motorTurn.getPower()));
+		servoTest.setPosition(servoPos);
 	}
 
 	//Op Mode disabled
 	@Override
 	public void stop() {
         //Set arm to starting position when shut down
-        servoTest.setPosition(0.6);
+        servoTest.setPosition(servoPos);
 	}
 	
 	/*
