@@ -48,33 +48,35 @@ public class ControllerOp extends OpMode {
 	// TETRIX VALUES.
 	final static double ARM_MIN_RANGE  = 0.0;
 	final static double ARM_MAX_RANGE  = 1.0;
-	final static double CLAW_MIN_RANGE  = 0.00;
-	final static double CLAW_MAX_RANGE  = 0.25;
-    final static double JOINT_MIN_RANGE = 0.40;
-    final static double JOINT_MAX_RANGE = 0.75;
+	final static double CLAW_MIN_RANGE  = 0.60;
+	final static double CLAW_MAX_RANGE  = 1.00;
+    final static double JOINT_MIN_RANGE = 0.30;
+    final static double JOINT_MAX_RANGE = 1.00;
 
 	// position of the arm servo.
 	double armPosition;
 	// amount to change the arm servo position.
-	double armDelta = 0.005;
+	double armDelta = 0.01;
 
 	// position of the claw motor
 	double clawPosition;
     // amount to change the claw servo position by
-    double clawDelta = 0.0005;
+    double clawDelta = 0.01;
 
     // position of the joint servo
     double jointPosition;
     // amount to change the joint servo position by
-    double jointDelta = 0.005;
+    double jointDelta = 0.01;
 
     //Position arm, joint, claw starts and ends in
-    double armStartingPosition = 1.0;
+    double armStartingPosition = 0.3;
     double jointStartingPosition = 0.5;
     double clawStartingPosition = 1.0;
 
     float left;
     float right;
+
+    int clock = 0;
 
 	DcMotor motorRight1;
     DcMotor motorRight2;
@@ -84,7 +86,6 @@ public class ControllerOp extends OpMode {
     Servo joint;
     Servo claw;
     Servo claw2;
-    DcMotor motorTurn;
     MatrixDcMotorController mc;
     ServoController sc;
 
@@ -101,10 +102,9 @@ public class ControllerOp extends OpMode {
         motorRight2 = hardwareMap.dcMotor.get("motor_3");
 		motorLeft1 = hardwareMap.dcMotor.get("motor_2");
         motorLeft2 = hardwareMap.dcMotor.get("motor_4");
-        //motorTurn = hardwareMap.dcMotor.get("motor_5");
 
 		//Reverse direction of left motor
-		motorLeft1.setDirection(DcMotor.Direction.REVERSE);
+        motorLeft1.setDirection(DcMotor.Direction.REVERSE);
         motorLeft2.setDirection(DcMotor.Direction.REVERSE);
 
 		//Get all servos
@@ -135,137 +135,155 @@ public class ControllerOp extends OpMode {
     //Loop every couple of ms
 	@Override
 	public void loop() {
-        ///////////////////////////////
-        ///////////////////////////////
-        //GAMEPAD1, DRIVING THE ROBOT//
-        ///////////////////////////////
-        ///////////////////////////////
+        if(clock % 10 == 0) {
+            ///////////////////////////////
+            ///////////////////////////////
+            //GAMEPAD1, DRIVING THE ROBOT//
+            ///////////////////////////////
+            ///////////////////////////////
 
-        ////////////////
-        //Acceleration//
-        ////////////////
-        //Get right trigger - Forwards
-        float acceleration = gamepad1.right_trigger;
-        //Get left trigger - Backwards
-        float decelelation = gamepad1.left_trigger;
+            //Rotate around axis
+            if(gamepad1.right_stick_x>0||gamepad1.right_stick_x<0) {
+                //Get steering direction
+                float direction = gamepad1.right_stick_x;
+                left = direction;
+                right = -direction;
+                //Steer to the right direction
+                motorRight1.setPower(right);
+                motorRight2.setPower(right);
+                motorLeft1.setPower(left);
+                motorLeft2.setPower(left);
+            }else {
+                ////////////////
+                //Acceleration//
+                ////////////////
+                //Get right trigger - Forwards
+                float acceleration = gamepad1.right_trigger;
+                //Get left trigger - Backwards
+                float decelelation = gamepad1.left_trigger;
 
-        //Clip acceleration and deceleration so it doesn't exceed 1 (full motor power)
-        acceleration = Range.clip(acceleration, 0, 1);
-        decelelation = Range.clip(decelelation, 0, 1);
+                //Clip acceleration and deceleration so it doesn't exceed 1 (full motor power)
+                acceleration = Range.clip(acceleration, 0, 1);
+                decelelation = Range.clip(decelelation, 0, 1);
 
-        //Scale input so it scales exponentially
-        acceleration = (float) scaleInput(acceleration);
-        decelelation = (float) scaleInput(decelelation);
-        DbgLog.msg("deceleration: "+decelelation);
+                //Scale input so it scales exponentially
+                acceleration = (float) scaleInput(acceleration);
+                decelelation = (float) scaleInput(decelelation);
+                DbgLog.msg("deceleration: " + decelelation);
 
-        //Calculate negative acceleration if deceleration is pressed
-        if (decelelation > 0) {
-            acceleration = 0 - decelelation;
-            DbgLog.msg("acceleration is now "+acceleration);
+                //Calculate negative acceleration if deceleration is pressed
+                if (decelelation > 0) {
+                    acceleration = 0 - decelelation;
+                    DbgLog.msg("acceleration is now " + acceleration);
+                }
+
+                /////////////
+                //Direction//
+                /////////////
+                //Get left stick
+                float direction = gamepad1.left_stick_x;
+                direction = Range.clip(direction, -1, 1);
+
+                //Calculate speed of left and right motor
+                left = acceleration;
+                right = acceleration;
+                if (direction < 0) {
+                    if (acceleration > 0) left = acceleration + direction;
+                    if (acceleration < 0) left = acceleration - direction;
+                    DbgLog.msg("Left is " + acceleration + "+" + direction + "=" + (acceleration + direction));
+                } else if (direction > 0) {
+                    if (acceleration > 0) right = acceleration - direction;
+                    if (acceleration < 0) right = acceleration + direction;
+                    DbgLog.msg("Right is " + acceleration + "-" + direction + "=" + (acceleration - direction));
+                }
+
+                if (acceleration > 0) {
+                    left = Range.clip(left, 0, 1);
+                    right = Range.clip(right, 0, 1);
+                } else if (acceleration < 0) {
+                    left = Range.clip(left, -1, 0);
+                    right = Range.clip(right, -1, 0);
+                }
+
+                /////////////
+                //Set speed//
+                /////////////
+                //After here, left and right motor power are calculated, so set values to motor
+                motorLeft1.setPower(left);
+                motorLeft2.setPower(left);
+                motorRight1.setPower(right);
+                motorRight2.setPower(right);
+            }
+
+            //////////////////////////////
+            //////////////////////////////
+            //GAMEPAD2, ARM, CLAW, JOINT//
+            //////////////////////////////
+            //////////////////////////////
+
+            ////////////////
+            //Arm Rotation//
+            ////////////////
+            // If the left stick is pressed, arm rotates
+            if (gamepad2.left_stick_x < 0) {
+                armPosition += armDelta;
+            } else if (gamepad2.left_stick_x > 0) {
+                armPosition -= armDelta;
+            }
+            //Make sure arm doesn't exceed min/max position
+            armPosition = Range.clip(armPosition, ARM_MIN_RANGE, ARM_MAX_RANGE);
+            //Set calculated position of arm
+            arm.setPosition(armPosition);
+
+            //////////////////
+            //Joint position//
+            //////////////////
+            //If Y is pressed, arm moves up
+            if (gamepad2.y) {
+                jointPosition += jointDelta;
+            }
+
+            //If A is pressed, arm moves down
+            if (gamepad2.a) {
+                jointPosition -= jointDelta;
+            }
+
+            //Make sure joint doesn't exceed min/max range
+            jointPosition = Range.clip(jointPosition, JOINT_MIN_RANGE, JOINT_MAX_RANGE);
+
+            // Set position of joint
+            joint.setPosition(jointPosition);
+
+            ////////////////
+            //Claw opening//
+            ////////////////
+            //If right stick is pressed, claw opens/closes
+            if (gamepad2.right_stick_y > 0) {
+                clawPosition += clawDelta;
+            } else if (gamepad2.right_stick_y < 0) {
+                clawPosition -= clawDelta;
+            }
+
+            //Make sure claw doesn't exceed min/max range
+            clawPosition = Range.clip(clawPosition, CLAW_MIN_RANGE, CLAW_MAX_RANGE);
+
+            //Set position of arm
+            claw.setPosition(clawPosition);
+            claw2.setPosition(1 - clawPosition);
+
+            /////////////
+            //Telemetry//
+            /////////////
+            //telemetry.addData("Text", "*** Robot Data***");
+            telemetry.addData("Arm", "Arm: " + String.valueOf(armPosition));
+            telemetry.addData("Joint","Joint: "+String.valueOf(jointPosition));
+            telemetry.addData("Claw", "Claw: " + String.valueOf(clawPosition));
+            //telemetry.addData("hook", "hook: "+String.valueOf());
+            telemetry.addData("Motor left", "Left: " + left);
+            telemetry.addData("Motor right", "Right: " + right);
+            //telemetry.addData("motor turn", "turn"+String.valueOf(motorTurn.getPower()));
         }
-
-        /////////////
-        //Direction//
-        /////////////
-        //Get left stick
-        float direction = gamepad1.left_stick_x;
-        direction = Range.clip(direction, -1, 1);
-
-        //Calculate speed of left and right motor
-        left = acceleration;
-        right = acceleration;
-        if (direction < 0) {
-            if(acceleration > 0) left = acceleration + direction;
-            if(acceleration < 0) left = acceleration - direction;
-            DbgLog.msg("Left is "+acceleration+"+"+direction+"="+(acceleration + direction));
-        } else if (direction > 0) {
-            if(acceleration > 0) right = acceleration - direction;
-            if(acceleration < 0) right = acceleration + direction;
-            DbgLog.msg("Right is "+acceleration+"-"+direction+"="+(acceleration - direction));
-        }
-
-		left = Range.clip(left,-1,1);
-        right = Range.clip(right,-1,1);
-
-        /////////////
-        //Set speed//
-        /////////////
-        //After here, left and right motor power are calculated, so set values to motor
-        motorLeft1.setPower(left);
-        motorLeft2.setPower(left);
-        motorRight1.setPower(right);
-        motorRight2.setPower(right);
-
-        //////////////////////////////
-        //////////////////////////////
-        //GAMEPAD2, ARM, CLAW, JOINT//
-        //////////////////////////////
-        //////////////////////////////
-
-        ////////////////
-        //Arm Rotation//
-        ////////////////
-        // If the left stick is pressed, arm rotates
-        if(gamepad2.left_stick_x>0){
-            armPosition+=armDelta;
-        }
-        else if(gamepad2.left_stick_x<0){
-            armPosition-=armDelta;
-        }
-        //Make sure arm doesn't exceed min/max position
-        armPosition = Range.clip(armPosition,ARM_MIN_RANGE,ARM_MAX_RANGE);
-        //Set calculated position of arm
-        arm.setPosition(armPosition);
-
-        //////////////////
-        //Joint position//
-        //////////////////
-        //If Y is pressed, arm moves up
-        if(gamepad2.y){
-            jointPosition+=jointDelta;
-        }
-
-        //If A is pressed, arm moves down
-        if(gamepad2.a){
-            jointPosition-=jointDelta;
-        }
-
-        //Make sure joint doesn't exceed min/max range
-        jointPosition = Range.clip(jointPosition,JOINT_MIN_RANGE,JOINT_MAX_RANGE);
-
-        // Set position of joint
-        joint.setPosition(jointPosition);
-
-        ////////////////
-        //Claw opening//
-        ////////////////
-        //If right stick is pressed, claw opens/closes
-        if(gamepad2.right_stick_y>0) {
-            clawPosition+=clawDelta;
-        }
-        else if(gamepad2.right_stick_y<0){
-            clawPosition-=clawDelta;
-        }
-
-        //Make sure claw doesn't exceed min/max range
-        clawPosition = Range.clip(clawPosition,CLAW_MIN_RANGE,CLAW_MAX_RANGE);
-
-        //Set position of arm
-        claw.setPosition(clawPosition);
-        claw2.setPosition(1-clawPosition);
-
-        /////////////
-        //Telemetry//
-        /////////////
-        //telemetry.addData("Text", "*** Robot Data***");
-        telemetry.addData("Arm","Arm: "+String.valueOf(armPosition));
-        //telemetry.addData("joint","joint: "+String.valueOf(jointPosition));
-        telemetry.addData("claw", "claw: "+String.valueOf(clawPosition));
-        //telemetry.addData("hook", "hook: "+String.valueOf());
-        telemetry.addData("Motor left","Left: "+left);
-        telemetry.addData("Motor right","Right: "+right);
-        //telemetry.addData("motor turn", "turn"+String.valueOf(motorTurn.getPower()));
-
+        clock += 1;
 	}
 
 	//Op Mode disabled
@@ -285,7 +303,7 @@ public class ControllerOp extends OpMode {
 	 */
 	double scaleInput(double dVal)  {
 		double[] scaleArray = { 0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
-				0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00 };
+				0.30, 0.36, 0.43, 0.50, 0.60};
 
 		// get the corresponding index for the scaleInput array.
 		int index = (int) (dVal * 16.0);
