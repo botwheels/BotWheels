@@ -146,8 +146,8 @@ public class ControllerOp extends OpMode {
             if(gamepad1.right_stick_x>0||gamepad1.right_stick_x<0) {
                 //Get steering direction
                 float direction = gamepad1.right_stick_x;
-                left = direction;
-                right = -direction;
+                left = 0.5f*direction;
+                right = -0.5f*direction;
                 //Steer to the right direction
                 motorRight1.setPower(right);
                 motorRight2.setPower(right);
@@ -183,6 +183,7 @@ public class ControllerOp extends OpMode {
                 //Get left stick
                 float direction = gamepad1.left_stick_x;
                 direction = Range.clip(direction, -1, 1);
+                direction *= 0.25f;
 
                 //Calculate speed of left and right motor
                 left = acceleration;
@@ -306,11 +307,11 @@ public class ControllerOp extends OpMode {
 				0.30, 0.36, 0.43, 0.50, 0.60};
 
 		// get the corresponding index for the scaleInput array.
-		int index = (int) (dVal * 16.0);
+		int index = (int) (dVal * 12.0);
 		if (index < 0) {
 			index = -index;
-		} else if (index > 16) {
-			index = 16;
+		} else if (index > 12) {
+			index = 12;
 		}
 
 		double dScale;
