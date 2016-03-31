@@ -50,7 +50,7 @@ public class ControllerOp extends OpMode {
 	final static double ARM_MAX_RANGE  = 1.0;
 	final static double CLAW_MIN_RANGE  = 0.60;
 	final static double CLAW_MAX_RANGE  = 1.00;
-    final static double JOINT_MIN_RANGE = 0.30;
+    final static double JOINT_MIN_RANGE = 0.2;
     final static double JOINT_MAX_RANGE = 1.00;
 
 	// position of the arm servo.
@@ -69,9 +69,9 @@ public class ControllerOp extends OpMode {
     double jointDelta = 0.01;
 
     //Position arm, joint, claw starts and ends in
-    double armStartingPosition = 0.3;
-    double jointStartingPosition = 0.5;
-    double clawStartingPosition = 1.0;
+    double armStartingPosition = 0.6;
+    double jointStartingPosition = 0.48;
+    double clawStartingPosition = 0.6;
 
     float left;
     float right;

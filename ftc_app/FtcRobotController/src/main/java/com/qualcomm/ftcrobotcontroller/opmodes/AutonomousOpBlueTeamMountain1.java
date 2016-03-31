@@ -145,7 +145,7 @@ public class AutonomousOpBlueTeamMountain1 extends OpMode {
 	public void loop() {
         //Drive forward out of parking spot on full speed for 2 seconds
         if (currentMode==1){
-            if (compareTime(startingSeconds)<2){
+            if (compareTime(startingSeconds)<1){
                 motorLeft1.setPower(1);
                 motorLeft2.setPower(1);
                 motorRight1.setPower(1);
@@ -165,7 +165,7 @@ public class AutonomousOpBlueTeamMountain1 extends OpMode {
                 motorRight2.setPower(1);
             }else{
                 //After 1 second drive forward again
-                currentMode=3;
+                //currentMode=3;
                 modeStartingTime = getTimeSeconds();
             }
         }
